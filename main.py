@@ -1,3 +1,5 @@
+from cards import *
+from hand import *
 from settings import *
 import ctypes, pygame, sys
 
