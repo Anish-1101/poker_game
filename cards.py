@@ -25,7 +25,7 @@ class Card:
     self.img = f"graphics/cards/{self.id}.png"
     self.card_rotation_angle = random.uniform(-3, 3)
     self.card_img = pygame.image.load(self.img)
-    self.card_img = pygame.transform.scale(self.card_img, (self.card_img.get_width() * 4, self.card_img.get_height() * 4))
+    self.card_img = pygame.transform.scale(self.card_img, (self.card_img.get_width() * 2, self.card_img.get_height() * 2))
     self.card_rot = pygame.transform.rotate(self.card_img, self.card_rotation_angle)
     self.card_bounding_rect = self.card_rot.get_bounding_rect()
     self.card_surf = pygame.Surface(self.card_bounding_rect.size, pygame.SRCALPHA)

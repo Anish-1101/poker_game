@@ -2,20 +2,16 @@ from hand import *
 from cards import *
 from settings import *
 import ctypes, pygame, sys
+from tests.test_eval_hand import *
 
+ctypes.windll.user32.SetProcessDPIAware()
 
 class Game:
   def __init__(self):
 
     # General setup
     pygame.init()
-
-    # Set the fixed game window size
-    self.screen_width = 1080
-    self.screen_height = 720
-
-    self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
-
+    self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption(TITLE_STRING)
     self.clock = pygame.time.Clock()
     self.hand = Hand()

@@ -131,7 +131,7 @@ class Dealer():
         self.animate_hole_card(self.animating_card)
 
       # Play audio
-     # self.card_audio()
+      # self.card_audio()
 
       # Remove dealt card from deck; change player index; prompt card dealing cooldown
       self.deck.pop(-1)
@@ -147,9 +147,14 @@ class Dealer():
       flop_x = self.players_list[0].cards[0].card_surf.get_width() * 2 + (self.players_list[0].cards[0].card_surf.get_width() + 20)
     elif self.current_flop_index == 2:
       flop_x = self.players_list[0].cards[0].card_surf.get_width() * 2 + (self.players_list[0].cards[0].card_surf.get_width() * 2 + 40)
+    elif self.current_flop_index == 3:
+      flop_x = self.players_list[0].cards[0].card_surf.get_width() * 2 + (self.players_list[0].cards[0].card_surf.get_width() * 3 + 40)
+    elif self.current_flop_index == 4:
+      flop_x = self.players_list[0].cards[0].card_surf.get_width() * 2 + (self.players_list[0].cards[0].card_surf.get_width() * 4 + 40)
 
-    # Three flop cards in above set locations; remove from deck; flop cooldown
-    if self.can_deal and self.can_deal_flop and self.dealt_cards - (self.num_players * 2) < 3:
+
+    # five flop cards in above set locations; remove from deck; flop cooldown
+    if self.can_deal and self.can_deal_flop and self.dealt_cards - (self.num_players * 2) < 5:
      # self.card_audio()
       self.flop.cards.append(self.deck[-1])
       self.flop.cards[self.current_flop_index].position = (flop_x, self.flop.cards[self.current_flop_index].card_y)
@@ -161,50 +166,134 @@ class Dealer():
     # Print length of deck after card is dealt for troubleshooting
     # print(f"{len(self.deck)} cards left in deck; {self.update_dealt_card_count()} dealt.")
 
-  # Hand-ranking algorithm reference in README.md
+
   def eval_hand(self, hand):
     # Return ranking followed by tie-break information.
-    # 8. Straight Flush
-    # 7. Four of a Kind
-    # 6. Full House
-    # 5. Flush
-    # 4. Straight
-    # 3. Three of a Kind
-    # 2. Two pair
-    # 1. One pair
-    # 0. High card
 
-    values = sorted([c[0] for c in hand], reverse=True)
-    suits = [c[1] for c in hand]
-    straight = (values == list(range(values[0], values[0]-5, -1)) or values == [14, 5, 4, 3, 2])
-    flush = all(s == suits[0] for s in suits)
+    # input - flop cards + player cards
+    # player_values = array of player card values
+    # player_suits = array of player suits 
+    # card_values = array of player card values and flop card values
+    # card_suits = array of player card suits and flop card suits 
 
-    if straight and flush: return 8, values[1]
-    if flush: return 5, values
-    if straight: return 4, values[1]
+    card_values = [c[0] for c in hand]
+    card_suits = [c[1] for c in hand]
 
-    trips = []
-    pairs = []
-    for v, group in itertools.groupby(values):
-      count = sum(1 for _ in group)
-      if count == 4: return 7, v, values
-      elif count == 3: trips.append(v)
-      elif count == 2: pairs.append(v)
+    #suit count function
+    suit_count = {}
 
-    if trips: return (6 if pairs else 3), trips, pairs, values
-    return len(pairs), pairs, values
+    for suit in card_suits:
+      if suit in suit_count:
+        suit_count[suit] += 1
+      else:
+        suit_count[suit] = 1
+    
+    # value count function
+    value_count = {}
 
+    for value in card_values:
+      if value in value_count:
+        value_count[value] += 1
+      else:
+        value_count[value] = 1
+
+    # number of pairs counter
+    number_of_pairs = 0
+    for value in set(card_values):
+      if value_count[value] == 2:
+        number_of_pairs += 1
+
+    # 9 royal flush - combine flush logic & straight logic & (check if card_values has  (10,J,Q,K,A) and if these five cards are all the same suit)
+    suited_values = []
+    for suit in suit_count:
+      if suit_count[suit] >= 5:
+        for i in range(len(card_values)):
+            if card_suits[i] == suit:
+              suited_values.append(card_values[i])
+        if sorted(suited_values) == [10, 11, 12, 13, 14]:
+          return 9, max(card_values)
+
+    # 8 straight flush - combine flush logic & straight logic (check if card_values has five in a row and if these five cards are all the same suit)
+    suited_straight_counter = 1
+    if len(sorted(suited_values)) > 4:
+      for i in range(len(suited_values)-1):
+        if sorted(suited_values)[i+1] - sorted(suited_values)[i] == 1:
+          suited_straight_counter += 1
+          if suited_straight_counter >= 5:
+            return 8, max(suited_values)
+        else:
+          suited_straight_counter = 1
+
+    # 7 quads - check if card_values has four of a kind
+    for value in card_values:
+      if value_count[value] == 4:
+        return 7, value # add tie break info
+
+    # 6 full-house logic - check if card_values has one three of a kind and one pair of a different value
+    for value in card_values:
+      if value_count[value] == 3 and number_of_pairs >= 1:
+        return 6, value # add tie break info
+
+    # 5 flush logic - check if card_suits has five of the same
+    for suit in card_suits:
+      if suit_count[suit] >= 5:
+        highest_flush_card = max(suited_values)
+        return 5, highest_flush_card # add tie break info
+
+    # 4 straight logic -  check if card_values has five in a row
+    straight_counter = 1
+    sorted_values = sorted(set(card_values))
+    for i in range(len(sorted_values)-1):
+      if sorted_values[i+1] - sorted_values[i] == 1:
+        straight_counter += 1
+        if straight_counter >= 5:
+          return 4, max(card_values) # add tie break info
+      else:
+        straight_counter = 1
+      # have to consider A for high card and low card straight
+
+    # 3 three of a kind - check if card_values have three of the same
+    for value in card_values:
+      if value_count[value] == 3:
+        return 3, value # add tie break info
+
+    # 2 two pair - check if card_values have two duplicates
+    if number_of_pairs == 2:
+      return 2, max(card_values) # add tie break info
+    if value_count[value] == 2:
+      number_of_pairs += 1
+
+    # 1 one pair - check if card_values have any duplicates
+    if number_of_pairs == 1:
+      return 1, max(card_values) # add tie break info
+
+    # 0 high card - find the highest card value of player_ values
+    else:
+      return 0, max(card_values)
+      # return highest value in player_values
+    
   def eval_winner(self, hand_to_eval):
     eval_cards = [(value_dict[x[0]], x[1]) for x in hand_to_eval]
-    if self.eval_hand(eval_cards[:5]) > self.eval_hand(eval_cards[5:]):
-      print(f"P1 WIN: {self.eval_hand(eval_cards[:5])}")
+    player_1_combo = self.eval_hand(eval_cards[:7])
+    player_2_combo = self.eval_hand(eval_cards[7:])
+    
+    if player_1_combo[0] > player_2_combo[0]:
+      print(f"P1 WIN: {self.eval_hand(eval_cards[:7])}")
       return "Player 1"
-    elif self.eval_hand(eval_cards[:5]) < self.eval_hand(eval_cards[5:]):
-      print(f"P2 WIN: {self.eval_hand(eval_cards[5:])}")
+    elif player_2_combo[0] > player_1_combo[0]:
+      print(f"P2 WIN: {self.eval_hand(eval_cards[7:])}")
       return "Player 2"
     else:
-      print("SPLIT")
-      return "Tie"
+      # tie-break info using the highest card info (second value in the tuple returned from eval_hand)
+      if player_1_combo[1] > player_2_combo[1]:
+        print(f"P1 WIN BY HIGH CARD: {self.eval_hand(eval_cards[:7])}")
+        return "Player 1"
+      elif player_2_combo[1] > player_1_combo[1]:
+        print(f"P2 WIN BY HIGH CARD: {self.eval_hand(eval_cards[7:])}")
+        return "Player 2" 
+      else:
+        print("SPLIT")
+        return "Tie"
 
   # Print to console
   def print_hands(self):
@@ -235,13 +324,13 @@ class Dealer():
       self.can_deal_flop = True
       self.deal_flop()
     # Slightly redundant
-    if self.dealt_cards < (self.num_players * 2) + 3 and self.can_deal_flop:
+    if self.dealt_cards < (self.num_players * 2) + 5 and self.can_deal_flop:
       self.deal_flop()
     # Print hand data to console
-    if not self.printed_flop and self.dealt_cards == (self.num_players * 2) + 3:
+    if not self.printed_flop and self.dealt_cards == (self.num_players * 2) + 5:
       self.print_hands()
       self.printed_flop = True
 
-    if self.dealt_cards == ((self.num_players * 2) + 3) and self.determined_winner is None:
-      eval_cards = [card_id.id for card_id in self.players_list[0].cards] + [card_id.id for card_id in self.flop.cards] + [card_id.id for card_id in self.players_list[1].cards]
-      self.determined_winner = self.eval_winner(eval_cards)
+    if self.dealt_cards == ((self.num_players * 2) + 5) and self.determined_winner is None:
+      eval_cards = [card_id.id for card_id in self.players_list[0].cards] + [card_id.id for card_id in self.flop.cards] + [card_id.id for card_id in self.flop.cards] + [card_id.id for card_id in self.players_list[1].cards]
+      self.determined_winner = self.eval_winner(eval_cards) 
