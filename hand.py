@@ -194,9 +194,11 @@ class Dealer():
 
     # number of pairs counter
     number_of_pairs = 0
+    pair_values = []
     for value in set(card_values):
       if value_count[value] == 2:
         number_of_pairs += 1
+        pair_values.append(value)
 
     # 9 royal flush - gather suited values & check if top five highest values are 10, J , Q, K , A
     suited_values = []
@@ -251,13 +253,17 @@ class Dealer():
     if set([2, 3, 4, 5, 14]).issubset(sorted_values):
       return 4, max(card_values)
     
+    straight_values = []
     for i in range(len(sorted_values)-1):
       if sorted_values[i+1] - sorted_values[i] == 1:
         straight_counter += 1
+        straight_values.append(sorted_values[i+1])
         if straight_counter >= 5:
-          return 4, max(card_values) # add proper tie break info
+          return 4, max(straight_values)
       else:
         straight_counter = 1
+
+        # tie breaker improvement - consider > 5 card straights
 
     # 3 three of a kind - check if card_values have three of the same
     for value in card_values:
@@ -266,17 +272,19 @@ class Dealer():
 
     # 2 two pair - check number of pairs value
     if number_of_pairs == 2:
-      return 2, max(card_values) # add proper tie break info
+      return 2, max(pair_values) 
     if value_count[value] == 2:
       number_of_pairs += 1
 
+      # tie breaker improvement - consider value of second pair if top pair is same
+
     # 1 one pair - check number of pairs value
     if number_of_pairs == 1:
-      return 1, max(card_values) # add proper tie break info
+      return 1, max(pair_values) 
 
     # 0 high card - find the highest card value of player_ values
     else:
-      return 0, max(card_values) # add proper tie-break info - return highest value in player_values
+      return 0, max(card_values) 
 
     
   def eval_winner(self, hand_to_eval):

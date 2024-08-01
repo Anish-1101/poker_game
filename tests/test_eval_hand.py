@@ -1,3 +1,5 @@
+
+
 def eval_hand_test():
     # Test Royal Flush
     assert eval_hand([(10, 'S'), (11, 'S'), (12, 'S'), (13, 'S'), (14, 'S'), (2, 'D'), (3, 'D')])[0] == 9, "Failed on Royal Flush"
@@ -65,6 +67,51 @@ def eval_hand_test():
     assert eval_hand([(11, 'D'), (11, 'S'), (9, 'D'), (10, 'D'), (8, 'D'), (3, 'H'), (4, 'S')])[0] == 1, "Failed on One Pair"
     assert eval_hand([(3, 'H'), (3, 'D'), (14, 'S'), (5, 'C'), (6, 'D'), (9, 'C'), (10, 'H')])[0] == 1, "Failed on One Pair"
 
+    # tie breaker logic
+    
+    # check for same royal flush value
+    assert eval_hand([(10, 'S'), (11, 'S'), (12, 'S'), (13, 'S'), (14, 'S'), (2, 'D'), (3, 'D')]) == eval_hand([(2, 'S'), (3, 'S'), (10, 'C'), (11, 'C'), (12, 'C'), (13, 'C'), (14, 'C')])
+
+      # check for higher straight flush
+    assert eval_hand([(4, 'H'), (5, 'H'), (6, 'H'), (2, 'D'), (3, 'D'),(2, 'H'), (3, 'H')])[1] < eval_hand([(4, 'H'), (5, 'H'), (6, 'H'), (2, 'D'), (3, 'D'), (7, 'H'), (8, 'H')])[1]
+    assert eval_hand([(4, 'H'), (5, 'H'), (6, 'H'), (2, 'D'), (3, 'D'), (2, 'H'), (3, 'H')])[1] < eval_hand([(4, 'H'), (5, 'H'), (6, 'H'), (2, 'D'), (3, 'D'), (3, 'H'), (7, 'H')])[1]
+    assert eval_hand([(4, 'H'), (5, 'H'), (6, 'H'), (2, 'D'), (3, 'D'), (2, 'H'), (3, 'H')])[1] < eval_hand([(4, 'H'), (5, 'H'), (6, 'H'), (2, 'D'), (3, 'D'), (4, 'H'), (8, 'H')])[1]
+
+      # check for higher value quads
+    assert eval_hand([(3, 'H'), (3, 'D'), (3, 'S'), (3, 'C'), (2, 'D'), (5, 'H'), (6, 'H')])[1] < eval_hand([(4, 'H'), (4, 'D'), (4, 'S'), (4, 'C'), (2, 'D'), (5, 'H'), (6, 'H')])[1]
+    assert eval_hand([(7, 'H'), (7, 'D'), (7, 'S'), (7, 'C'), (2, 'D'), (5, 'H'), (6, 'H')])[1] < eval_hand([(8, 'H'), (8, 'D'), (8, 'S'), (8, 'C'), (2, 'D'), (5, 'H'), (6, 'H')])[1]
+    assert eval_hand([(10, 'H'), (10, 'D'), (10, 'S'), (10, 'C'), (2, 'D'), (5, 'H'), (6, 'H')])[1] < eval_hand([(11, 'H'), (11, 'D'), (11, 'S'), (11, 'C'), (2, 'D'), (5, 'H'), (6, 'H')])[1]
+
+      # check for better full house
+    assert eval_hand([(3, 'H'), (3, 'D'), (2, 'S'), (2, 'C'), (2, 'D'), (3, 'S'), (5, 'H')])[1] < eval_hand([(4, 'H'), (4, 'D'), (2, 'S'), (2, 'C'), (2, 'D'), (4, 'S'), (5, 'H')])[1]
+    assert eval_hand([(7, 'H'), (7, 'D'), (2, 'S'), (2, 'C'), (2, 'D'), (7, 'S'), (5, 'H')])[1] < eval_hand([(8, 'H'), (8, 'D'), (2, 'S'), (2, 'C'), (2, 'D'), (8, 'S'), (5, 'H')])[1]
+    assert eval_hand([(10, 'H'), (10, 'D'), (2, 'S'), (2, 'C'), (2, 'D'), (10, 'S'), (5, 'H')])[1] < eval_hand([(11, 'H'), (11, 'D'), (2, 'S'), (2, 'C'), (2, 'D'), (11, 'S'), (5, 'H')])[1]
+
+      # check for higher flush
+    assert eval_hand([(2, 'H'), (4, 'H'), (6, 'H'), (8, 'H'), (5, 'D'), (9, 'H'), (3, 'C')])[1] < eval_hand([(2, 'H'), (4, 'H'), (6, 'H'), (8, 'H'), (5, 'D'), (11, 'H'), (3, 'C')])[1]
+    assert eval_hand([(3, 'S'), (5, 'S'), (7, 'S'), (9, 'S'), (2, 'D'), (12, 'S'), (4, 'C')])[1] < eval_hand([(3, 'S'), (5, 'S'), (7, 'S'), (9, 'S'), (2, 'D'), (13, 'S'), (4, 'C')])[1]
+    assert eval_hand([(2, 'C'), (4, 'C'), (6, 'C'), (8, 'C'), (3, 'D'), (7, 'C'), (5, 'H')])[1] < eval_hand([(2, 'C'), (4, 'C'), (6, 'C'), (8, 'C'), (3, 'D'), (10, 'C'), (5, 'H')])[1]
+
+      # check for higher straight
+    assert eval_hand([(4, 'H'), (5, 'D'), (6, 'S'), (7, 'C'), (3, 'D'), (13, 'H'), (2, 'C')])[1] < eval_hand([(4, 'H'), (5, 'D'), (6, 'S'), (7, 'C'), (3, 'D'), (9, 'H'), (7, 'D')])[1]
+    assert eval_hand([(6, 'H'), (7, 'D'), (8, 'S'), (4, 'C'), (5, 'D'), (12, 'H'), (2, 'C')])[1] < eval_hand([(6, 'H'), (7, 'D'), (8, 'S'), (9, 'C'), (5, 'D'), (11, 'H'), (3, 'C')])[1]
+    assert eval_hand([(3, 'H'), (4, 'D'), (5, 'S'), (6, 'C'), (2, 'D'), (11, 'H'), (9, 'C')])[1] < eval_hand([(3, 'H'), (13, 'D'), (5, 'S'), (6, 'C'), (7, 'D'), (8, 'H'), (9, 'C')])[1]
+
+      # check for higher value 3 of a kind
+    assert eval_hand([(4, 'H'), (4, 'D'), (4, 'S'), (8, 'C'), (3, 'D'), (5, 'H'), (6, 'H')])[1] < eval_hand([(5, 'H'), (5, 'D'), (5, 'S'), (2, 'C'), (9, 'D'), (4, 'H'), (6, 'H')])[1]
+    assert eval_hand([(7, 'H'), (7, 'D'), (7, 'S'), (2, 'C'), (3, 'D'), (5, 'H'), (6, 'H')])[1] < eval_hand([(8, 'H'), (8, 'D'), (8, 'S'), (2, 'C'), (3, 'D'), (4, 'H'), (6, 'H')])[1]
+    assert eval_hand([(9, 'H'), (9, 'D'), (9, 'S'), (2, 'C'), (3, 'D'), (5, 'H'), (6, 'H')])[1] < eval_hand([(10, 'H'), (10, 'D'), (10, 'S'), (2, 'C'), (3, 'D'), (4, 'H'), (6, 'H')])[1]
+
+      # check for a higher value two pair
+    assert eval_hand([(4, 'H'), (4, 'D'), (8, 'S'), (8, 'C'), (3, 'D'), (5, 'H'), (6, 'H')])[1] < eval_hand([(5, 'H'), (5, 'D'), (9, 'S'), (9, 'C'), (2, 'D'), (4, 'H'), (6, 'H')])[1]
+    assert eval_hand([(7, 'H'), (7, 'D'), (2, 'S'), (2, 'C'), (3, 'D'), (5, 'H'), (6, 'H')])[1] < eval_hand([(8, 'H'), (8, 'D'), (3, 'S'), (3, 'C'), (2, 'D'), (4, 'H'), (6, 'H')])[1]
+    assert eval_hand([(9, 'H'), (9, 'D'), (4, 'S'), (4, 'C'), (3, 'D'), (5, 'H'), (6, 'H')])[1] < eval_hand([(10, 'H'), (10, 'D'), (5, 'S'), (5, 'C'), (2, 'D'), (4, 'H'), (6, 'H')])[1]
+
+      # check for a higher value pair
+    assert eval_hand([(4, 'H'), (4, 'D'), (8, 'S'), (7, 'C'), (10, 'D'), (5, 'H'), (12, 'H')])[1] < eval_hand([(5, 'H'), (5, 'D'), (9, 'S'), (13, 'C'), (3, 'D'), (4, 'H'), (6, 'H')])[1]
+    assert eval_hand([(7, 'H'), (7, 'D'), (2, 'S'), (14, 'C'), (4, 'D'), (5, 'H'), (6, 'H')])[1] < eval_hand([(8, 'H'), (8, 'D'), (3, 'S'), (2, 'C'), (11, 'D'), (5, 'H'), (6, 'H')])[1]
+    assert eval_hand([(9, 'H'), (9, 'D'), (4, 'S'), (13, 'C'), (3, 'D'), (5, 'H'), (6, 'H')])[1] < eval_hand([(10, 'H'), (10, 'D'), (5, 'S'), (2, 'C'), (12, 'D'), (4, 'H'), (6, 'H')])[1]
+
     print("All tests passed!")
 
 def eval_hand(hand):
@@ -95,9 +142,11 @@ def eval_hand(hand):
 
   # number of pairs counter
   number_of_pairs = 0
+  pair_values = []
   for value in set(card_values):
     if value_count[value] == 2:
       number_of_pairs += 1
+      pair_values.append(value)
 
   # 9 royal flush - gather suited values & check if top five highest values are 10, J , Q, K , A
   suited_values = []
@@ -152,13 +201,16 @@ def eval_hand(hand):
   if set([2, 3, 4, 5, 14]).issubset(sorted_values):
     return 4, max(card_values)
   
+  straight_values = []
   for i in range(len(sorted_values)-1):
     if sorted_values[i+1] - sorted_values[i] == 1:
       straight_counter += 1
+      straight_values.append(sorted_values[i+1])
       if straight_counter >= 5:
-        return 4, max(card_values) # add proper tie break info
+        return 4, max(straight_values)
     else:
       straight_counter = 1
+
 
   # 3 three of a kind - check if card_values have three of the same
   for value in card_values:
@@ -167,19 +219,14 @@ def eval_hand(hand):
 
   # 2 two pair - check number of pairs value
   if number_of_pairs == 2:
-    return 2, max(card_values) # add proper tie break info
+    return 2, max(pair_values) 
   if value_count[value] == 2:
     number_of_pairs += 1
 
   # 1 one pair - check number of pairs value
   if number_of_pairs == 1:
-    return 1, max(card_values) # add proper tie break info
+    return 1, max(pair_values) 
 
   # 0 high card - find the highest card value of player_ values
   else:
-    return 0, max(card_values) # add proper tie-break info - return highest value in player_values
-
-
-
-
-
+    return 0, max(card_values) 

@@ -2,8 +2,12 @@
 Poker Game Project:
 
 Changes to make:
-    Solve tie-breaking logic for hand-ranking algorithm
-        Add tie-breaking test cases
+    Hand-ranking algorithm improvements:
+        - higher two pair when top pair is same value
+        - more than five card straight and finding the highest value
+        - getting highest player card after board has best hand rank
+
+    Add tie-breaking test cases
     
     Test speed of exisiting algorithm
 

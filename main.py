@@ -46,5 +46,8 @@ class Game:
       self.hand.update()
       self.clock.tick(FPS)
 
+      #  game = Game()
+      # game.run()
+
 if __name__ == '__main__':
   eval_hand_test()
