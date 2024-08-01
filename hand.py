@@ -166,13 +166,8 @@ class Dealer():
     # Print length of deck after card is dealt for troubleshooting
     # print(f"{len(self.deck)} cards left in deck; {self.update_dealt_card_count()} dealt.")
 
-
   def eval_hand(self, hand):
-    # Return ranking followed by tie-break information.
-
     # input - flop cards + player cards
-    # player_values = array of player card values
-    # player_suits = array of player suits 
     # card_values = array of player card values and flop card values
     # card_suits = array of player card suits and flop card suits 
 
@@ -203,21 +198,29 @@ class Dealer():
       if value_count[value] == 2:
         number_of_pairs += 1
 
-    # 9 royal flush - combine flush logic & straight logic & (check if card_values has  (10,J,Q,K,A) and if these five cards are all the same suit)
+    # 9 royal flush - gather suited values & check if top five highest values are 10, J , Q, K , A
     suited_values = []
     for suit in suit_count:
       if suit_count[suit] >= 5:
         for i in range(len(card_values)):
             if card_suits[i] == suit:
               suited_values.append(card_values[i])
-        if sorted(suited_values) == [10, 11, 12, 13, 14]:
-          return 9, max(card_values)
+        if sorted(suited_values)[-5:] == [10, 11, 12, 13, 14]:
+          return 9, 14
 
-    # 8 straight flush - combine flush logic & straight logic (check if card_values has five in a row and if these five cards are all the same suit)
+    # 8 straight flush - sort suited values & check if they are consecutive
     suited_straight_counter = 1
-    if len(sorted(suited_values)) > 4:
+    sorted_suited_values = sorted(suited_values)
+
+    # check for ace low straight flush
+    if set([2, 3, 4, 5, 14]).issubset(sorted_suited_values):
+      return 8, max(suited_values)
+    
+    if len(sorted_suited_values) > 4:
       for i in range(len(suited_values)-1):
-        if sorted(suited_values)[i+1] - sorted(suited_values)[i] == 1:
+        if sorted_suited_values[i] == 2 and sorted_suited_values[-1] == 14:
+          suited_straight_counter += 1
+        if sorted_suited_values[i+1] - sorted_suited_values[i] == 1:
           suited_straight_counter += 1
           if suited_straight_counter >= 5:
             return 8, max(suited_values)
@@ -227,50 +230,54 @@ class Dealer():
     # 7 quads - check if card_values has four of a kind
     for value in card_values:
       if value_count[value] == 4:
-        return 7, value # add tie break info
+        return 7, value 
 
-    # 6 full-house logic - check if card_values has one three of a kind and one pair of a different value
+    # 6 full-house logic - check if card_values has one three of a kind and at least one pair
     for value in card_values:
       if value_count[value] == 3 and number_of_pairs >= 1:
-        return 6, value # add tie break info
+        return 6, value 
 
     # 5 flush logic - check if card_suits has five of the same
     for suit in card_suits:
       if suit_count[suit] >= 5:
         highest_flush_card = max(suited_values)
-        return 5, highest_flush_card # add tie break info
+        return 5, highest_flush_card 
 
     # 4 straight logic -  check if card_values has five in a row
     straight_counter = 1
     sorted_values = sorted(set(card_values))
+
+    # check for ace low straight
+    if set([2, 3, 4, 5, 14]).issubset(sorted_values):
+      return 4, max(card_values)
+    
     for i in range(len(sorted_values)-1):
       if sorted_values[i+1] - sorted_values[i] == 1:
         straight_counter += 1
         if straight_counter >= 5:
-          return 4, max(card_values) # add tie break info
+          return 4, max(card_values) # add proper tie break info
       else:
         straight_counter = 1
-      # have to consider A for high card and low card straight
 
     # 3 three of a kind - check if card_values have three of the same
     for value in card_values:
       if value_count[value] == 3:
-        return 3, value # add tie break info
+        return 3, value 
 
-    # 2 two pair - check if card_values have two duplicates
+    # 2 two pair - check number of pairs value
     if number_of_pairs == 2:
-      return 2, max(card_values) # add tie break info
+      return 2, max(card_values) # add proper tie break info
     if value_count[value] == 2:
       number_of_pairs += 1
 
-    # 1 one pair - check if card_values have any duplicates
+    # 1 one pair - check number of pairs value
     if number_of_pairs == 1:
-      return 1, max(card_values) # add tie break info
+      return 1, max(card_values) # add proper tie break info
 
     # 0 high card - find the highest card value of player_ values
     else:
-      return 0, max(card_values)
-      # return highest value in player_values
+      return 0, max(card_values) # add proper tie-break info - return highest value in player_values
+
     
   def eval_winner(self, hand_to_eval):
     eval_cards = [(value_dict[x[0]], x[1]) for x in hand_to_eval]
