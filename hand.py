@@ -49,6 +49,7 @@ class Hand:
     self.render_cards()
     self.render_winner()
 
+
 class Dealer():
   def __init__(self, players, flop):
     self.determined_winner = None
@@ -62,13 +63,18 @@ class Dealer():
     self.animating_card = None
     self.can_deal = True
     self.can_deal_flop = False
+
+    self.can_deal_turn = False
+    self.can_deal_river = False
+
     self.last_dealt_card_time = None
     self.last_dealt_flop_time = None
     self.dealt_cards = 0
     self.flop = flop
-    # self.audio_channel = 0
+    self.display_surface = pygame.display.get_surface()
 
-  
+    self.mouse_down = False
+    self.checked = False
 
   def generate_deck(self):
     fresh_deck = []
@@ -147,21 +153,40 @@ class Dealer():
       flop_x = self.players_list[0].cards[0].card_surf.get_width() * 2 + (self.players_list[0].cards[0].card_surf.get_width() + 20)
     elif self.current_flop_index == 2:
       flop_x = self.players_list[0].cards[0].card_surf.get_width() * 2 + (self.players_list[0].cards[0].card_surf.get_width() * 2 + 40)
-    elif self.current_flop_index == 3:
-      flop_x = self.players_list[0].cards[0].card_surf.get_width() * 2 + (self.players_list[0].cards[0].card_surf.get_width() * 3 + 40)
-    elif self.current_flop_index == 4:
-      flop_x = self.players_list[0].cards[0].card_surf.get_width() * 2 + (self.players_list[0].cards[0].card_surf.get_width() * 4 + 40)
 
-
-    # five flop cards in above set locations; remove from deck; flop cooldown
-    if self.can_deal and self.can_deal_flop and self.dealt_cards - (self.num_players * 2) < 5:
-     # self.card_audio()
+    if self.can_deal and self.can_deal_flop and self.dealt_cards - (self.num_players * 2) < 3:
       self.flop.cards.append(self.deck[-1])
       self.flop.cards[self.current_flop_index].position = (flop_x, self.flop.cards[self.current_flop_index].card_y)
       self.deck.pop(-1)
       self.last_dealt_flop_time = pygame.time.get_ticks()
       self.can_deal_flop = False
       self.current_flop_index += 1
+
+  def deal_turn(self):
+      if self.can_deal_turn:
+          flop_x = self.players_list[0].cards[0].card_surf.get_width() * 2 + (self.players_list[0].cards[0].card_surf.get_width() * 3 + 40)  
+          self.flop.cards.append(self.deck[-1])
+          self.deck.pop(-1)
+          self.flop.cards[3].position = (flop_x, self.flop.cards[3].card_y)
+          self.can_deal_turn = False
+          print("Turn card dealt.")
+
+  def deal_river(self):
+      if self.can_deal_river:
+          flop_x = self.players_list[0].cards[0].card_surf.get_width() * 2 + (self.players_list[0].cards[0].card_surf.get_width() * 4 + 60)  
+          self.flop.cards.append(self.deck[-1])
+          self.deck.pop(-1)
+          self.flop.cards[4].position = (flop_x, self.flop.cards[4].card_y)
+          self.can_deal_river = False
+          print("River card dealt.")
+
+  def calculate_card_position(self, index):
+      # Calculate the x-position based on the index of the card
+      card_width = self.players_list[0].cards[0].card_surf.get_width()
+      spacing = 20  # Space between cards
+      start_x = card_width * 2
+      return start_x + (card_width + spacing) * index
+
 
     # Print length of deck after card is dealt for troubleshooting
     # print(f"{len(self.deck)} cards left in deck; {self.update_dealt_card_count()} dealt.")
@@ -220,8 +245,6 @@ class Dealer():
     
     if len(sorted_suited_values) > 4:
       for i in range(len(suited_values)-1):
-        if sorted_suited_values[i] == 2 and sorted_suited_values[-1] == 14:
-          suited_straight_counter += 1
         if sorted_suited_values[i+1] - sorted_suited_values[i] == 1:
           suited_straight_counter += 1
           if suited_straight_counter >= 5:
@@ -335,7 +358,7 @@ class Dealer():
       self.animate_hole_card(self.animating_card)
 
     # Deal flop after hole cards are dealt and animations are done
-    if self.dealt_cards == (self.num_players * 2) and (not self.animating_card or self.animating_card.animation_complete):
+    if self.dealt_cards == (self.num_players * 2) and (not self.animating_card or self.animating_card.animation_complete) and self.checked:
       self.can_deal_flop = True
       self.deal_flop()
     # Slightly redundant
@@ -345,6 +368,12 @@ class Dealer():
     if not self.printed_flop and self.dealt_cards == (self.num_players * 2) + 5:
       self.print_hands()
       self.printed_flop = True
+    
+    if self.can_deal_flop:
+      self.deal_turn()
+
+    if self.can_deal_flop:
+      self.deal_river()
 
     if self.dealt_cards == ((self.num_players * 2) + 5) and self.determined_winner is None:
       eval_cards = [card_id.id for card_id in self.players_list[0].cards] + [card_id.id for card_id in self.flop.cards] + [card_id.id for card_id in self.flop.cards] + [card_id.id for card_id in self.players_list[1].cards]
