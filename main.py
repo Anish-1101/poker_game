@@ -5,7 +5,8 @@ import ctypes, pygame, sys
 from tests.test_eval_hand import *
 from tests.hand_ranking_speed import *
 
-ctypes.windll.user32.SetProcessDPIAware()
+if sys.platform == "win32":
+  ctypes.windll.user32.SetProcessDPIAware()
 
 class CheckButton():
   def __init__(self, x, y, width, height, text, font, color, text_color):
