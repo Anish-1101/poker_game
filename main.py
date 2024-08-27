@@ -8,6 +8,14 @@ from tests.hand_ranking_speed import *
 if sys.platform == "win32":
   ctypes.windll.user32.SetProcessDPIAware()
 
+class Money():
+   def __init__(self):
+      self.player_money = 2500
+      self.dealer_money = 2500
+      self.pot = 0
+    
+
+
 class CheckButton():
   def __init__(self, x, y, width, height, text, font, color, text_color):
       self.rect = pygame.Rect(x, y, width, height)
@@ -52,6 +60,7 @@ class Game:
     self.clock = pygame.time.Clock()
     self.hand = Hand()
     self.check_counter = 0
+    self.money = Money()
 
     # check button
     button_font = pygame.font.Font(GAME_FONT, 60)
@@ -71,8 +80,9 @@ class Game:
       self.screen.fill(BG_COLOR)
       self.check_button.render(self.screen)
       self.reset_button.render(self.screen)
-      self.display_money(self.screen, self.hand.dealer.money, pygame.font.Font(GAME_FONT, 60), True)
-      self.display_money(self.screen, self.hand.money, pygame.font.Font(GAME_FONT, 60), False)
+      self.display_money(self.screen, self.money.dealer_money, pygame.font.Font(GAME_FONT, 60), 0)
+      self.display_money(self.screen, self.money.player_money, pygame.font.Font(GAME_FONT, 60), 1)
+      self.display_money(self.screen, self.money.pot, pygame.font.Font(GAME_FONT, 60), 2)
       self.hand.update()
       self.clock.tick(FPS)
 
@@ -108,12 +118,16 @@ class Game:
             self.mouse_down = False
 
   def display_money(self, screen, money, font, is_dealer):
-    if is_dealer:
+    if is_dealer == 0:
       money_text = font.render(f"Dealer Money: ${money}", True, (255, 255, 255))
       screen.blit(money_text, (1400, 730)) 
-    else:
+    elif is_dealer == 1:
        money_text = font.render(f"Your Money: ${money}", True, (255, 255, 255))
        screen.blit(money_text, (10, 730)) 
+    else:
+       money_text = font.render(f"The Pot: ${money}", True, (255, 255, 255))
+       screen.blit(money_text, (690, 550))
+
 
 
 
