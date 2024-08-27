@@ -13,6 +13,7 @@ class Hand:
     self.flop = Flop()
     self.player_list = [self.p1, self.p2]
     self.dealer = Dealer(self.player_list, self.flop)
+    self.money = 2500
 
   def render_cards(self):
     # Draw cards at current positions
@@ -75,6 +76,8 @@ class Dealer():
 
     self.mouse_down = False
     self.checked = False
+
+    self.money = 2500
 
   def generate_deck(self):
     fresh_deck = []

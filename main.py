@@ -71,6 +71,8 @@ class Game:
       self.screen.fill(BG_COLOR)
       self.check_button.render(self.screen)
       self.reset_button.render(self.screen)
+      self.display_money(self.screen, self.hand.dealer.money, pygame.font.Font(GAME_FONT, 60), True)
+      self.display_money(self.screen, self.hand.money, pygame.font.Font(GAME_FONT, 60), False)
       self.hand.update()
       self.clock.tick(FPS)
 
@@ -104,6 +106,15 @@ class Game:
         if event.button == 1:  
           if self.mouse_down:
             self.mouse_down = False
+
+  def display_money(self, screen, money, font, is_dealer):
+    if is_dealer:
+      money_text = font.render(f"Dealer Money: ${money}", True, (255, 255, 255))
+      screen.blit(money_text, (1400, 730)) 
+    else:
+       money_text = font.render(f"Your Money: ${money}", True, (255, 255, 255))
+       screen.blit(money_text, (10, 730)) 
+
 
 
 if __name__ == '__main__':
