@@ -13,8 +13,6 @@ class Money():
       self.player_money = 2500
       self.dealer_money = 2500
       self.pot = 0
-    
-
 
 class CheckButton():
   def __init__(self, x, y, width, height, text, font, color, text_color):
@@ -50,6 +48,23 @@ class ResetButton():
   def is_clicked(self, pos):
       return self.rect.collidepoint(pos)
 
+class FoldButton():
+  def __init__(self, x, y, width, height, text, font, color, text_color):
+      self.rect = pygame.Rect(x, y, width, height)
+      self.text = text
+      self.font = font
+      self.color = color
+      self.text_color = text_color
+
+  def render(self, surface):
+      pygame.draw.rect(surface, self.color, self.rect)
+      text_surface = self.font.render(self.text, True, self.text_color)
+      text_rect = text_surface.get_rect(center=self.rect.center)
+      surface.blit(text_surface, text_rect)
+
+  def is_clicked(self, pos):
+      return self.rect.collidepoint(pos)
+
 class Game:
   def __init__(self):
 
@@ -61,12 +76,25 @@ class Game:
     self.hand = Hand()
     self.check_counter = 0
     self.money = Money()
+    self.display_winner = False
 
     # check button
     button_font = pygame.font.Font(GAME_FONT, 60)
     self.check_button = CheckButton(100, 200, 200, 80, "Check", button_font, (0, 255, 0), (255, 255, 255))
-    self.reset_button = ResetButton(100, 100, 200, 80, "Reset", button_font, (0, 255, 0), (255, 255, 255))
+    self.reset_button = ResetButton(100, 100, 200, 80, "New Hand", button_font, (0, 255, 0), (255, 255, 255))
+    self.fold_button = FoldButton(100, 000, 200, 80, "Fold", button_font, (0, 255, 0), (255, 255, 255))
     self.mouse_down = False
+
+  def display_winner_text(self, screen):
+    coordinates = (520, 100)
+    text = "Player 2 Wins!"
+    text_color = (135, 206, 235)  # Light blue
+    self.font = pygame.font.Font(GAME_FONT, 120)
+    self.win_rotation_angle = random.uniform(-10, 10)
+    text_surface = self.font.render(text, True, text_color)
+    text_rect = text_surface.get_rect()
+    text_rect.topleft = coordinates
+    screen.blit(text_surface, text_rect)
 
   def run(self):
     self.start_time = pygame.time.get_ticks()
@@ -80,11 +108,15 @@ class Game:
       self.screen.fill(BG_COLOR)
       self.check_button.render(self.screen)
       self.reset_button.render(self.screen)
+      self.fold_button.render(self.screen)
       self.display_money(self.screen, self.money.dealer_money, pygame.font.Font(GAME_FONT, 60), 0)
       self.display_money(self.screen, self.money.player_money, pygame.font.Font(GAME_FONT, 60), 1)
       self.display_money(self.screen, self.money.pot, pygame.font.Font(GAME_FONT, 60), 2)
       self.hand.update()
       self.clock.tick(FPS)
+
+      if self.display_winner:
+         self.display_winner_text(self.screen)
 
   def handle_events(self):
     for event in pygame.event.get():
@@ -99,7 +131,7 @@ class Game:
             self.check_counter += 1
 
             if self.check_counter == 1:
-              self.hand.dealer.checked = True
+              self.hand.dealer.player_checked = True
               print("Check button clicked!")
             if self.check_counter == 2:
               self.hand.dealer.can_deal_turn = True
@@ -110,7 +142,11 @@ class Game:
 
           if self.reset_button.is_clicked(event.pos):
              self.hand = Hand()
+             self.display_winner = False
              self.check_counter = 0
+
+          if self.fold_button.is_clicked(event.pos):
+             self.display_winner = True      
 
       if event.type == pygame.MOUSEBUTTONUP:
         if event.button == 1:  
@@ -126,8 +162,7 @@ class Game:
        screen.blit(money_text, (10, 730)) 
     else:
        money_text = font.render(f"The Pot: ${money}", True, (255, 255, 255))
-       screen.blit(money_text, (690, 550))
-
+       screen.blit(money_text, (690, 250))
 
 
 

@@ -74,7 +74,7 @@ class Dealer():
     self.display_surface = pygame.display.get_surface()
 
     self.mouse_down = False
-    self.checked = False
+    self.player_checked = False
 
 
   def generate_deck(self):
@@ -359,7 +359,7 @@ class Dealer():
       self.animate_hole_card(self.animating_card)
 
     # Deal flop after hole cards are dealt and animations are done
-    if self.dealt_cards == (self.num_players * 2) and (not self.animating_card or self.animating_card.animation_complete) and self.checked:
+    if self.dealt_cards == (self.num_players * 2) and (not self.animating_card or self.animating_card.animation_complete) and self.player_checked:
       self.can_deal_flop = True
       self.deal_flop()
     # Slightly redundant
